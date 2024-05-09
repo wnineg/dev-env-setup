@@ -1,4 +1,6 @@
 set hlsearch
+set ignorecase
+set smartcase
 set showcmd
 set incsearch
 set scrolloff=1
@@ -7,6 +9,8 @@ set shiftwidth=4
 set tabstop=4
 set softtabstop=4
 set expandtab
+" Enable all vim-python/python-syntax syntax highlights
+let g:python_highlight_all = 1
 
 call plug#begin()
 
@@ -22,6 +26,8 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-surround'
 Plug 'junegunn/vim-easy-align'
+Plug 'vim-python/python-syntax'
+Plug 'airblade/vim-gitgutter'
 
 call plug#end()
 
@@ -29,6 +35,12 @@ call plug#end()
 syntax enable
 set background=dark
 colorscheme solarized
+
+" vim-gitgutter
+set updatetime=100
+highlight SignColumn ctermbg=Black
+let g:gitgutter_set_sign_backgrounds = 1
+"let g:gitgutter_diff_base = 'HEAD'
 
 " Cursor config
 if has('nvim')
@@ -55,7 +67,7 @@ else
     set ttyfast
 endif
 
-noremap <Leader>0 ^
+noremap \\0 ^
 
 " This unsets the 'last search pattern' register by hitting return
 nnoremap <silent> <C-l> :noh<CR>
@@ -100,3 +112,24 @@ augroup gitsetup
                 \ autocmd CursorMoved,CursorMovedI *
                 \ let &l:textwidth = line('.') == 1 ? 0 : 120
 augroup end
+
+" Put these in an autocmd group, so that you can revert them with:
+" ":autocmd! vimStartup"
+augroup vimStartup
+autocmd!
+
+" Copied from https://github.com/vim/vim/blob/master/runtime/defaults.vim
+" When editing a file, always jump to the last known cursor position.
+" Don't do it when the position is invalid, when inside an event handler
+" (happens when dropping a file on gvim), for a commit or rebase message
+" (likely a different one than last time), and when using xxd(1) to filter
+" and edit binary files (it transforms input files back and forth, causing
+" them to have dual nature, so to speak)
+autocmd BufReadPost *
+  \ let line = line("'\"")
+  \ | if line >= 1 && line <= line("$") && &filetype !~# 'commit'
+  \      && index(['xxd', 'gitrebase'], &filetype) == -1
+  \ |   execute "normal! g`\""
+  \ | endif
+
+augroup END
