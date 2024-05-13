@@ -28,6 +28,9 @@ Plug 'tpope/vim-surround'
 Plug 'junegunn/vim-easy-align'
 Plug 'vim-python/python-syntax'
 Plug 'airblade/vim-gitgutter'
+Plug 'wellle/context.vim'
+Plug 'mogelbrod/vim-jsonpath'
+Plug 'machakann/vim-highlightedyank'
 
 call plug#end()
 
@@ -66,8 +69,6 @@ else
     set ttimeoutlen=1
     set ttyfast
 endif
-
-noremap \\0 ^
 
 " This unsets the 'last search pattern' register by hitting return
 nnoremap <silent> <C-l> :noh<CR>
@@ -133,3 +134,22 @@ autocmd BufReadPost *
   \ | endif
 
 augroup END
+
+" Alternating between first non-white char and beginning of the line
+function AltJumpToStart()
+    let col = match(getline('.'), '\S') + 1
+    if col('.') == col
+        call cursor(line('.'), 1)
+    else
+        call cursor(line('.'), col)
+    endif
+endfunction
+function AltJumpToStartVirtual()
+    normal gv
+    call AltJumpToStart()
+endfunction
+nnoremap <silent> 0 :call AltJumpToStart()<CR>
+vnoremap <silent> 0 :call AltJumpToStartVirtual()<CR>
+
+" vim-highlightedyank
+let g:highlightedyank_highlight_duration = 200
