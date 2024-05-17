@@ -1,0 +1,46 @@
+[user]
+	name = William Wong
+[alias]
+	indiff = diff --staged
+	amend = commit --amend
+	# To limit the lengths of messages, add the format option like: --format=\"%C(auto)%h %d %<(120,trunc)%s\"
+	ls = log --graph --author-date-order --oneline -25
+	fixup = commit --fixup
+	squash = commit --squash
+	shownames = show --name-status
+	pick = cherry-pick
+	ff = merge --ff-only
+	go = switch
+	wt = worktree
+
+[rebase]
+	autosquash = true
+[credential]
+	helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager.exe
+[core]
+	autocrlf = false
+    pager = delta --dark
+[interactive]
+    diffFilter = delta --color-only --dark
+[delta]
+    navigate = true
+    side-by-side = true
+[diff]
+    colorMoved = default
+[pager]
+	status = true
+[pull]
+	rebase = true
+[merget]
+	tool = vimdiff
+[merge]
+	tool = bc
+[mergetool "bc"]
+	path = /mnt/c/Program Files/Beyond Compare 4/BCompare.exe
+	trustExitCode = true
+[mergetool]
+	keepBackup = false
+
+# For directory-based configs, use includeif
+#[includeIf "gitdir:~/dev/proj/personal/"]
+#    path = "~/.config/git/personal/.gitconfig"
