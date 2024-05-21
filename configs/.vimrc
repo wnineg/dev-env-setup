@@ -9,8 +9,6 @@ set shiftwidth=4
 set tabstop=4
 set softtabstop=4
 set expandtab
-" Enable all vim-python/python-syntax syntax highlights
-let g:python_highlight_all = 1
 
 call plug#begin()
 
@@ -34,18 +32,7 @@ Plug 'machakann/vim-highlightedyank'
 
 call plug#end()
 
-" vim-colors-solarized
-syntax enable
-set background=dark
-colorscheme solarized
-
-" vim-gitgutter
-set updatetime=100
-highlight SignColumn ctermbg=Black
-let g:gitgutter_set_sign_backgrounds = 1
-"let g:gitgutter_diff_base = 'HEAD'
-
-" Cursor config
+" Cursor Appearance
 if has('nvim')
     " Restore cursor fix the neovim
     augroup RestoreCursorShapeOnExit
@@ -70,15 +57,48 @@ else
     set ttyfast
 endif
 
-" This unsets the 'last search pattern' register by hitting return
-nnoremap <silent> <C-l> :noh<CR>
-" Toggle NERDTree
-nnoremap <F5> :exec 'NERDTreeToggle' <CR>
+" Copy from https://github.com/vim/vim/blob/master/runtime/defaults.vim
+" Put these in an autocmd group, so that you can revert them with:
+" ":autocmd! vimStartup"
+augroup vimStartup
+    autocmd!
+
+    " When editing a file, always jump to the last known cursor position.
+    " Don't do it when the position is invalid, when inside an event handler
+    " (happens when dropping a file on gvim), for a commit or rebase message
+    " (likely a different one than last time), and when using xxd(1) to filter
+    " and edit binary files (it transforms input files back and forth, causing
+    " them to have dual nature, so to speak)
+    autocmd BufReadPost *
+                \ let line = line("'\"")
+                \ | if line >= 1 && line <= line("$") && &filetype !~# 'commit'
+                    \      && index(['xxd', 'gitrebase'], &filetype) == -1
+                    \ |   execute "normal! g`\""
+                    \ | endif
+
+augroup END
+
+" vim-colors-solarized
+syntax enable
+set background=dark
+colorscheme solarized
+
+" vim-gitgutter
+set updatetime=100
+highlight SignColumn ctermbg=Black
+let g:gitgutter_set_sign_backgrounds = 1
+"let g:gitgutter_diff_base = 'HEAD'
+
+" Enable all vim-python/python-syntax syntax highlights
+let g:python_highlight_all = 1
 
 " fzf.vim config
 nnoremap <silent> <C-O> :Files <CR>
 nnoremap <silent> <A-f> :Rg <CR>
 let g:fzf_action = { 'enter': 'tab split' }
+
+" vim-highlightedyank
+let g:highlightedyank_highlight_duration = 200
 
 " --------------------------- "
 " Start vim-easymotion config "
@@ -105,6 +125,72 @@ map <Leader>k <Plug>(easymotion-k)
 " End vim-easymotion config "
 " ------------------------- "
 
+" This unsets the 'last search pattern' register by hitting return
+nnoremap <silent> <C-l> :noh<CR>
+" Toggle NERDTree
+nnoremap <F5> :exec 'NERDTreeToggle' <CR>
+
+" Alternating between first non-white char and beginning of the line
+function AltJumpToStart(virtual = 0)
+    if a:virtual
+        normal! gv
+    endif
+    let col = match(getline('.'), '\S') + 1
+    if col('.') == col
+        call cursor(line('.'), 1)
+    else
+        call cursor(line('.'), col)
+    endif
+endfunction
+nnoremap <silent> 0 :call AltJumpToStart()<CR>
+vnoremap <silent> 0 :call AltJumpToStart(1)<CR>
+
+" Similarly to the native commands 'o' and 'O' but works nicely with repeat
+" count.
+function InsertNewLines(n, above = 0)
+    let action = (a:above ? 'O' : 'o')
+    if a:n == 0
+        exec 'normal!' . action
+    else
+        exec 'normal!' . a:n . action
+    endif
+    if a:above && a:n > 1
+        exec 'normal!' . (a:n - 1) . 'k'
+    endif
+    startinsert
+endfunction
+nnoremap <silent> o :<C-u>call InsertNewLines(v:count)<CR>
+nnoremap <silent> O :<C-u>call InsertNewLines(v:count, 1)<CR>
+
+" Add an additional empty line after inserting new lines if the 'next' line 
+" following the insertion direction isn't empty.
+function InsertIsolatedLines(n, above = 0)
+    call InsertNewLines(a:n, a:above)
+    if a:above
+        if line('.') != 1 && getline(line('.') - 1) !~ '^\s*$'
+            normal! O
+            normal! j
+        endif
+    elseif line('.') != line('$') && getline(line('.') + 1) !~ '^\s*$'
+        normal! o
+        normal! k
+    endif
+endfunction
+nnoremap <silent> <leader>o :<C-u>call InsertIsolatedLines(v:count)<CR>
+nnoremap <silent> <leader>O :<C-u>call InsertIsolatedLines(v:count, 1)<CR>
+
+function TestTW()
+    if &textwidth
+        echo &textwidth
+    else
+        echo 'ZERO'
+    endif
+endfunction
+
+" -------------------------- "
+" File Type Specific Configs "
+" -------------------------- "
+
 augroup gitsetup
     autocmd!
 
@@ -113,43 +199,3 @@ augroup gitsetup
                 \ autocmd CursorMoved,CursorMovedI *
                 \ let &l:textwidth = line('.') == 1 ? 0 : 120
 augroup end
-
-" Put these in an autocmd group, so that you can revert them with:
-" ":autocmd! vimStartup"
-augroup vimStartup
-autocmd!
-
-" Copied from https://github.com/vim/vim/blob/master/runtime/defaults.vim
-" When editing a file, always jump to the last known cursor position.
-" Don't do it when the position is invalid, when inside an event handler
-" (happens when dropping a file on gvim), for a commit or rebase message
-" (likely a different one than last time), and when using xxd(1) to filter
-" and edit binary files (it transforms input files back and forth, causing
-" them to have dual nature, so to speak)
-autocmd BufReadPost *
-  \ let line = line("'\"")
-  \ | if line >= 1 && line <= line("$") && &filetype !~# 'commit'
-  \      && index(['xxd', 'gitrebase'], &filetype) == -1
-  \ |   execute "normal! g`\""
-  \ | endif
-
-augroup END
-
-" Alternating between first non-white char and beginning of the line
-function AltJumpToStart()
-    let col = match(getline('.'), '\S') + 1
-    if col('.') == col
-        call cursor(line('.'), 1)
-    else
-        call cursor(line('.'), col)
-    endif
-endfunction
-function AltJumpToStartVirtual()
-    normal gv
-    call AltJumpToStart()
-endfunction
-nnoremap <silent> 0 :call AltJumpToStart()<CR>
-vnoremap <silent> 0 :call AltJumpToStartVirtual()<CR>
-
-" vim-highlightedyank
-let g:highlightedyank_highlight_duration = 200
