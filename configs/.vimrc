@@ -92,6 +92,8 @@ let g:gitgutter_set_sign_backgrounds = 1
 " Enable all vim-python/python-syntax syntax highlights
 let g:python_highlight_all = 1
 
+let mapleader = ' '
+
 " fzf.vim config
 nnoremap <silent> <C-O> :Files <CR>
 nnoremap <silent> <A-f> :Rg <CR>
@@ -149,15 +151,20 @@ vnoremap <silent> 0 :call AltJumpToStart(1)<CR>
 " count.
 function InsertNewLines(n, above = 0)
     let action = (a:above ? 'O' : 'o')
-    if a:n == 0
-        exec 'normal!' . action
-    else
-        exec 'normal!' . a:n . action
+    " Only inserts (n - 1) lines here, as to leave one 'new line' action to
+    " preserve the auto indentation at the end.
+    if a:n > 1
+        exec 'normal!' . (a:n - 1) . action
     endif
-    if a:above && a:n > 1
-        exec 'normal!' . (a:n - 1) . 'k'
+    " Moves the cursor only (n - 2) when inserting lines above, because there
+    " are two moving up by the two `O` actions already when n >= 2. 
+    if a:above && a:n > 2
+        exec 'normal!' . (a:n - 2) . 'k'
     endif
-    startinsert
+    " The trick to preserve the auto indentation.
+    " https://vi.stackexchange.com/a/4409
+    exec 'normal!' . action . "\<SPACE>\<BS>\<ESC>"
+    startinsert!
 endfunction
 nnoremap <silent> o :<C-u>call InsertNewLines(v:count)<CR>
 nnoremap <silent> O :<C-u>call InsertNewLines(v:count, 1)<CR>
@@ -179,13 +186,24 @@ endfunction
 nnoremap <silent> <leader>o :<C-u>call InsertIsolatedLines(v:count)<CR>
 nnoremap <silent> <leader>O :<C-u>call InsertIsolatedLines(v:count, 1)<CR>
 
-function TestTW()
-    if &textwidth
-        echo &textwidth
-    else
-        echo 'ZERO'
+function BreakAndTrim()
+    " Removes the previous spaces only when the previous char is a space.
+    if getline('.')[col('.') - 2] == ' '
+        let [lnum, cnum] = searchpos('[^ ] ', 'bes', line('.'))
+        if lnum
+            normal! "_d`'
+        endif
     endif
+    " Removes the following spaces only when the current char is a space.
+    if getline('.')[col('.') - 1] == ' '
+        let [lnum, cnum] = searchpos(' [^ ]', 's', line('.'))
+        if lnum
+            normal! "_d`'
+        endif
+    endif
+    exec "normal!i\<CR>"
 endfunction
+nnoremap <silent> <C-j> :call BreakAndTrim()<CR>
 
 " -------------------------- "
 " File Type Specific Configs "
