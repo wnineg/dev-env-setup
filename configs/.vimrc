@@ -1,34 +1,34 @@
+set expandtab
 set hlsearch
 set ignorecase
-set smartcase
-set showcmd
 set incsearch
-set scrolloff=1
 set number
+set scrolloff=1
 set shiftwidth=4
-set tabstop=4
+set showcmd
+set smartcase
 set softtabstop=4
-set expandtab
+set tabstop=4
 
 call plug#begin()
 
+Plug 'airblade/vim-gitgutter'
 Plug 'altercation/vim-colors-solarized'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'easymotion/vim-easymotion'
-Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'editorconfig/editorconfig-vim'
-Plug 'ziglang/zig.vim'
-Plug 'scrooloose/nerdtree'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'tpope/vim-surround'
 Plug 'junegunn/vim-easy-align'
-Plug 'vim-python/python-syntax'
-Plug 'airblade/vim-gitgutter'
-Plug 'wellle/context.vim'
-Plug 'mogelbrod/vim-jsonpath'
 Plug 'machakann/vim-highlightedyank'
+Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+Plug 'mogelbrod/vim-jsonpath'
+Plug 'scrooloose/nerdtree'
+Plug 'tpope/vim-surround'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'vim-python/python-syntax'
+Plug 'wellle/context.vim'
+Plug 'ziglang/zig.vim'
 
 call plug#end()
 
@@ -78,6 +78,10 @@ augroup vimStartup
 
 augroup END
 
+" -------------- "
+" Plugin Configs "
+" -------------- "
+
 " vim-colors-solarized
 syntax enable
 set background=dark
@@ -92,44 +96,39 @@ let g:gitgutter_set_sign_backgrounds = 1
 " Enable all vim-python/python-syntax syntax highlights
 let g:python_highlight_all = 1
 
-let mapleader = ' '
-
 " fzf.vim config
-nnoremap <silent> <C-O> :Files <CR>
-nnoremap <silent> <A-f> :Rg <CR>
 let g:fzf_action = { 'enter': 'tab split' }
 
 " vim-highlightedyank
 let g:highlightedyank_highlight_duration = 200
 
-" --------------------------- "
-" Start vim-easymotion config "
-" --------------------------- "
-
+" vim-easymotion
 let g:EasyMotion_do_mapping = 0 " Disable default mappings
+let g:EasyMotion_smartcase = 1 " Turn on case-insensitive feature
 
-" <Leader>f{char} to move to {char}
-map  <Leader>f <Plug>(easymotion-bd-f)
-nmap <Leader>f <Plug>(easymotion-overwin-f)
+" ------ "
+" Keymap "
+" ------ "
 
-" `s{char}{char}{label}`
-" Need one more keystroke, but on average, it may be more comfortable.
-nmap s <Plug>(easymotion-overwin-f2)
+let mapleader = "\<SPACE>"
 
-" Turn on case-insensitive feature
-let g:EasyMotion_smartcase = 1
-
-" JK motions: Line motions
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
-
-" ------------------------- "
-" End vim-easymotion config "
-" ------------------------- "
-
-" This unsets the 'last search pattern' register by hitting return
+inoremap jk <ESC>
 nnoremap <silent> <C-l> :noh<CR>
-" Toggle NERDTree
+nnoremap U <C-r>
+nnoremap <BS> i<BS><ESC>l
+
+" fzf.vim
+nnoremap <silent> <C-O> :Files <CR>
+nnoremap <silent> <A-f> :Rg <CR>
+
+" vim-easymotion
+noremap  <Leader>f <Plug>(easymotion-bd-f)
+nnoremap <Leader>f <Plug>(easymotion-overwin-f)
+nnoremap s <Plug>(easymotion-overwin-f2)
+noremap <Leader>j <Plug>(easymotion-j)
+noremap <Leader>k <Plug>(easymotion-k)
+
+" NERDTree
 nnoremap <F5> :exec 'NERDTreeToggle' <CR>
 
 " Alternating between first non-white char and beginning of the line
@@ -137,11 +136,11 @@ function AltJumpToStart(virtual = 0)
     if a:virtual
         normal! gv
     endif
-    let col = match(getline('.'), '\S') + 1
-    if col('.') == col
-        call cursor(line('.'), 1)
+    let cnum = match(getline('.'), '\S') + 1
+    if col('.') == cnum
+        normal! 0
     else
-        call cursor(line('.'), col)
+        exec 'normal!' . cnum . '|'
     endif
 endfunction
 nnoremap <silent> 0 :call AltJumpToStart()<CR>
@@ -186,7 +185,9 @@ endfunction
 nnoremap <silent> <leader>o :<C-u>call InsertIsolatedLines(v:count)<CR>
 nnoremap <silent> <leader>O :<C-u>call InsertIsolatedLines(v:count, 1)<CR>
 
-function BreakAndTrim()
+" Trims the surrounding spaces (0x20) then break the line at the current
+" position.
+function TrimAndBreak()
     " Removes the previous spaces only when the previous char is a space.
     if getline('.')[col('.') - 2] == ' '
         let [lnum, cnum] = searchpos('[^ ] ', 'bes', line('.'))
@@ -203,7 +204,7 @@ function BreakAndTrim()
     endif
     exec "normal!i\<CR>"
 endfunction
-nnoremap <silent> <C-j> :call BreakAndTrim()<CR>
+nnoremap <silent> <C-j> :call TrimAndBreak()<CR>
 
 " -------------------------- "
 " File Type Specific Configs "
