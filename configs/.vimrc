@@ -1,14 +1,20 @@
+set cursorline
 set expandtab
 set hlsearch
 set ignorecase
 set incsearch
+set list
+set listchars=tab:⇤–⇥,space:·,trail:·,precedes:⇠,extends:⇢,nbsp:×
+set mouse=
 set number
 set scrolloff=1
 set shiftwidth=4
+set showbreak=↪
 set showcmd
 set smartcase
 set softtabstop=4
 set tabstop=4
+set timeoutlen=3000
 
 call plug#begin()
 
@@ -112,43 +118,51 @@ let g:EasyMotion_smartcase = 1 " Turn on case-insensitive feature
 
 let mapleader = "\<SPACE>"
 
+" Misc mapping
 inoremap jk <ESC>
-nnoremap <silent> <C-l> :noh<CR>
+nnoremap <expr> <C-l> (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n"
+
+" Editing under normal mode
 nnoremap U <C-r>
 nnoremap <BS> i<BS><ESC>l
+
+" Select pasted text
+nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
+nnoremap gP <nop>
 
 " fzf.vim
 nnoremap <silent> <C-O> :Files <CR>
 nnoremap <silent> <A-f> :Rg <CR>
 
 " vim-easymotion
-noremap  <Leader>f <Plug>(easymotion-bd-f)
-nnoremap <Leader>f <Plug>(easymotion-overwin-f)
-nnoremap s <Plug>(easymotion-overwin-f2)
-noremap <Leader>j <Plug>(easymotion-j)
-noremap <Leader>k <Plug>(easymotion-k)
+nmap  <Leader>f <Plug>(easymotion-bd-f)
+nmap <Leader>f <Plug>(easymotion-overwin-f)
+nmap s <Plug>(easymotion-overwin-f2)
+nmap <Leader>j <Plug>(easymotion-j)
+nmap <Leader>k <Plug>(easymotion-k)
 
 " NERDTree
-nnoremap <F5> :exec 'NERDTreeToggle' <CR>
+nnoremap <silent> <F5> :exec 'NERDTreeToggle' <CR>
 
 " Alternating between first non-white char and beginning of the line
-function AltJumpToStart(virtual = 0)
-    if a:virtual
+function s:AltJumpToStart(visual = 0)
+    if a:visual
         normal! gv
     endif
-    let cnum = match(getline('.'), '\S') + 1
+    let cnum = col('.')
+    normal! ^
     if col('.') == cnum
         normal! 0
-    else
-        exec 'normal!' . cnum . '|'
     endif
 endfunction
-nnoremap <silent> 0 :call AltJumpToStart()<CR>
-vnoremap <silent> 0 :call AltJumpToStart(1)<CR>
+nnoremap <silent> 0 :call <SID>AltJumpToStart()<CR>
+vnoremap <silent> 0 :call <SID>AltJumpToStart(1)<CR>
+nnoremap <Leader>0 0
+vnoremap <Leader>0 0
 
 " Similarly to the native commands 'o' and 'O' but works nicely with repeat
 " count.
-function InsertNewLines(n, above = 0)
+function s:InsertNewLines(n, above = 0)
     let action = (a:above ? 'O' : 'o')
     " Only inserts (n - 1) lines here, as to leave one 'new line' action to
     " preserve the auto indentation at the end.
@@ -165,29 +179,39 @@ function InsertNewLines(n, above = 0)
     exec 'normal!' . action . "\<SPACE>\<BS>\<ESC>"
     startinsert!
 endfunction
-nnoremap <silent> o :<C-u>call InsertNewLines(v:count)<CR>
-nnoremap <silent> O :<C-u>call InsertNewLines(v:count, 1)<CR>
+nnoremap <silent> o :<C-u>call <SID>InsertNewLines(v:count)<CR>
+nnoremap <silent> O :<C-u>call <SID>InsertNewLines(v:count, 1)<CR>
 
-" Add an additional empty line after inserting new lines if the 'next' line 
-" following the insertion direction isn't empty.
-function InsertIsolatedLines(n, above = 0)
-    call InsertNewLines(a:n, a:above)
+function s:NewParagraph(above = 0)
+    " Deteremines if an extra padding line should be inserted between the
+    " current and the new line.
+    let shouldPad = getline(line('.')) !~ '^\s*$'
+    let nl = (a:above ? line('.') - 1 : line('.') + 1) " _next_ line num
+    let nlSome = getline(nl) !~ '^\s*$' " is the _next_ line not empty?
+
+    call <SID>InsertNewLines(1, a:above)
+
     if a:above
-        if line('.') != 1 && getline(line('.') - 1) !~ '^\s*$'
-            normal! O
-            normal! j
-        endif
-    elseif line('.') != line('$') && getline(line('.') + 1) !~ '^\s*$'
-        normal! o
-        normal! k
+        let addAbove = line('.') > 1 && nlSome
+        let addBelow = shouldPad
+    else
+        let addAbove = shouldPad
+        let addBelow = line('.') < line('$') && nlSome
+    endif
+    if addAbove
+        exec "normal! O\<ESC>j"
+    endif
+    if addBelow
+        exec "normal! o\<ESC>k"
     endif
 endfunction
-nnoremap <silent> <leader>o :<C-u>call InsertIsolatedLines(v:count)<CR>
-nnoremap <silent> <leader>O :<C-u>call InsertIsolatedLines(v:count, 1)<CR>
+" Starts a new line below/above isolated from the other non-blank lines.
+nnoremap <silent> <leader>o :call <SID>NewParagraph()<CR>
+nnoremap <silent> <leader>O :call <SID>NewParagraph(1)<CR>
 
 " Trims the surrounding spaces (0x20) then break the line at the current
 " position.
-function TrimAndBreak()
+function s:TrimAndBreak()
     " Removes the previous spaces only when the previous char is a space.
     if getline('.')[col('.') - 2] == ' '
         let [lnum, cnum] = searchpos('[^ ] ', 'bes', line('.'))
@@ -204,7 +228,37 @@ function TrimAndBreak()
     endif
     exec "normal!i\<CR>"
 endfunction
-nnoremap <silent> <C-j> :call TrimAndBreak()<CR>
+nnoremap <silent> <C-j> :call <SID>TrimAndBreak()<CR>
+
+" Works like the native `{` and `}` but aware of indented paragraphs.
+function s:JumpToNextParag(reverse, visual = 0)
+    if a:reverse
+        let step = -1
+        let CheckBound = {n -> n != 1}
+    else
+        let step = 1
+        let last = line('$')
+        let CheckBound = {n -> n != last}
+    endif
+    if a:visual
+        normal! gv
+    endif
+
+    let lnum = line('.')
+    if getline(lnum) =~ '^\s*$'
+        while getline(lnum) =~ '^\s*$' && CheckBound(lnum)
+            let lnum += step
+        endwhile
+    endif
+    while getline(lnum) !~ '^\s*$' && CheckBound(lnum)
+        let lnum += step
+    endwhile
+    exec 'normal!' . lnum . 'gg^'
+endfunction
+nnoremap <silent> { :call <SID>JumpToNextParag(1)<CR>
+nnoremap <silent> } :call <SID>JumpToNextParag(0)<CR>
+vnoremap <silent> { :<C-u>call <SID>JumpToNextParag(1, 1)<CR>
+vnoremap <silent> } :<C-u>call <SID>JumpToNextParag(0, 1)<CR>
 
 " -------------------------- "
 " File Type Specific Configs "
