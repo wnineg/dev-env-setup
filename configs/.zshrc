@@ -81,11 +81,16 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-syntax-highlighting git)
-
-source $ZSH/oh-my-zsh.sh
+plugins=(zsh-vi-mode zsh-syntax-highlighting git)
 
 # User configuration
+
+# Set the init mode of zsh-vi-mode to sourcing before the sourcing of oh-my-zsh.sh
+#ZVM_INIT_MODE=sourcing
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
+ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
+
+source $ZSH/oh-my-zsh.sh
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -149,32 +154,38 @@ function explore() {
 
 export FZF_DEFAULT_COMMAND='fd --type file'
 
-# Use fd (https://github.com/sharkdp/fd) instead of the default find
-# command for listing path candidates.
-# - The first argument to the function ($1) is the base path to start traversal
-# - See the source code (completion.{bash,zsh}) for the details.
 _fzf_compgen_path() {
-  fd --hidden --follow --exclude ".git" . "$1"
+    # Use fd (https://github.com/sharkdp/fd) instead of the default find
+    # command for listing path candidates.
+    # - The first argument to the function ($1) is the base path to start traversal
+    # - See the source code (completion.{bash,zsh}) for the details.
+    #fd --hidden --follow --exclude ".git" . "$1"
+
+    bfs -L -exclude -name '.git' "$1" 2>/dev/null
 }
 
-# Use fd to generate the list for directory completion
 _fzf_compgen_dir() {
-  fd --type d --hidden --follow --exclude ".git" . "$1"
+    # Use fd to generate the list for directory completion
+    #fd --type d --hidden --follow --exclude ".git" . "$1"
+
+    bfs -L -type d -exclude -name '.git' "$1" 2>/dev/null
 }
 
 # Advanced customization of fzf options via _fzf_comprun function
 # - The first argument to the function is the name of the command.
 # - You should make sure to pass the rest of the arguments to fzf.
 _fzf_comprun() {
-  local command=$1
-  shift
+    local command=$1
+    shift
 
-  case "$command" in
-    cd)           fzf --preview 'tree -C {} | head -200'                     "$@" ;;
-    export|unset) fzf --preview "eval 'echo \$'{}"                           "$@" ;;
-    ssh)          fzf --preview 'dig {}'                                     "$@" ;;
-    *)            fzf --preview 'bat -n --color=always --line-range=:500 {}' "$@" ;;
-  esac
+    case "$command" in
+        cd)           fzf --preview 'tree -C {} | head -200'                     "$@" ;;
+        export|unset) fzf --preview "eval 'echo \$'{}"                           "$@" ;;
+        ssh)          fzf --preview 'dig {}'                                     "$@" ;;
+        *)            fzf --preview 'bat -n --color=always --line-range=:500 {}' "$@" ;;
+    esac
 }
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+#[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# For the keybinding compatibility issue between zsh-vi-mode and fzf
+zvm_after_init_commands+=('[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh')
