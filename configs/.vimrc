@@ -1,8 +1,10 @@
+set breakindent
 set cursorline
 set expandtab
 set hlsearch
 set ignorecase
 set incsearch
+set linebreak
 set list
 set listchars=tab:⇤–⇥,space:·,trail:·,precedes:⇠,extends:⇢,nbsp:×
 set mouse=
@@ -13,8 +15,12 @@ set showbreak=↪
 set showcmd
 set smartcase
 set softtabstop=4
+set spell
+set spelllang=en_us,en_gb
+set spelloptions=camel
 set tabstop=4
 set timeoutlen=3000
+set virtualedit=onemore,block
 
 call plug#begin()
 
@@ -120,11 +126,17 @@ let mapleader = "\<SPACE>"
 
 " Misc mapping
 inoremap jk <ESC>
+nnoremap <BS> <ESC>
+onoremap <BS> <ESC>
+vnoremap <BS> <ESC>
 nnoremap <expr> <C-l> (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n"
+nnoremap $ g$
+nnoremap g$ $
+" <C-_> is actually <C-/>
+xnoremap <C-_> <ESC>/\%V
 
 " Editing under normal mode
 nnoremap U <C-r>
-nnoremap <BS> i<BS><ESC>l
 
 " Select pasted text
 nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
@@ -144,6 +156,10 @@ nmap <Leader>k <Plug>(easymotion-k)
 " NERDTree
 nnoremap <silent> <F5> :exec 'NERDTreeToggle' <CR>
 
+" vim-easy-align
+nmap ga <Plug>(EasyAlign)
+xmap ga <Plug>(EasyAlign)
+
 " Alternating between first non-white char and beginning of the line
 function s:AltJumpToStart(visual = 0)
     if a:visual
@@ -160,54 +176,57 @@ vnoremap <silent> 0 :call <SID>AltJumpToStart(1)<CR>
 nnoremap <Leader>0 0
 vnoremap <Leader>0 0
 
-" Similarly to the native commands 'o' and 'O' but works nicely with repeat
-" count.
+" Adds n new lines (without explicitly going into the insert mode).
 function s:InsertNewLines(n, above = 0)
+    if a:n < 1
+        return
+    endif
     let action = (a:above ? 'O' : 'o')
-    " Only inserts (n - 1) lines here, as to leave one 'new line' action to
-    " preserve the auto indentation at the end.
-    if a:n > 1
-        exec 'normal!' . (a:n - 1) . action
-    endif
-    " Moves the cursor only (n - 2) when inserting lines above, because there
-    " are two moving up by the two `O` actions already when n >= 2. 
-    if a:above && a:n > 2
-        exec 'normal!' . (a:n - 2) . 'k'
-    endif
-    " The trick to preserve the auto indentation.
-    " https://vi.stackexchange.com/a/4409
-    exec 'normal!' . action . "\<SPACE>\<BS>\<ESC>"
-    startinsert!
-endfunction
-nnoremap <silent> o :<C-u>call <SID>InsertNewLines(v:count)<CR>
-nnoremap <silent> O :<C-u>call <SID>InsertNewLines(v:count, 1)<CR>
-
-function s:NewParagraph(above = 0)
-    " Deteremines if an extra padding line should be inserted between the
-    " current and the new line.
-    let shouldPad = getline(line('.')) !~ '^\s*$'
-    let nl = (a:above ? line('.') - 1 : line('.') + 1) " _next_ line num
-    let nlSome = getline(nl) !~ '^\s*$' " is the _next_ line not empty?
-
-    call <SID>InsertNewLines(1, a:above)
-
-    if a:above
-        let addAbove = line('.') > 1 && nlSome
-        let addBelow = shouldPad
-    else
-        let addAbove = shouldPad
-        let addBelow = line('.') < line('$') && nlSome
-    endif
-    if addAbove
-        exec "normal! O\<ESC>j"
-    endif
-    if addBelow
-        exec "normal! o\<ESC>k"
+    exec 'normal!' . a:n . action
+    " Moves the cursor only (n - 1) upward when inserting lines above (there is
+    " already an initial upward move).
+    if a:above && a:n > 1
+        exec 'normal!' . (a:n - 1) . 'k'
     endif
 endfunction
-" Starts a new line below/above isolated from the other non-blank lines.
-nnoremap <silent> <leader>o :call <SID>NewParagraph()<CR>
-nnoremap <silent> <leader>O :call <SID>NewParagraph(1)<CR>
+" The below two mappings adds (n - 1) lines using the function first, then add
+" the last one using the native `o`/`O` command directly in the mapped
+" sequence. This trick helps to preserve the auto indentation when the cursor
+" goes into the insert mode at the last new line.
+" NOTE: Another trick mentioned in https://vi.stackexchange.com/a/4409 has the
+" drawback of the indentation of the last new line will always be preserved and
+" never clean up inside blocks (doesn't happen outside of blocks) even if the
+" line doesn't get any inputs afterward. (Indentation inside blocks of empty
+" lines would not be cleaned up as long as it had some inputs beforehand, even
+" the inputs are deleted immediately before leaving the insert mode)
+nnoremap <silent> o :<C-u>call <SID>InsertNewLines(v:count - 1)<CR>o
+nnoremap <silent> O :<C-u>call <SID>InsertNewLines(v:count - 1, 1)<CR>O
+
+"function s:InsertNewParagPadding(above = 0)
+"    let padCount = 0
+"
+"    " If the current is not an empty line, we need a padding.
+"    if getline(line('.')) !~ '^\s*$'
+"        padCount += 1
+"    endif
+"
+"    let nl = (a:above ? line('.') - 1 : line('.') + 1) " _next_ line num
+"    let nlSome = getline(nl) !~ '^\s*$' " is the _next_ line not empty?
+"    if a:above
+"        if line('.') > 1 && nlSome
+"            padCount += 1
+"        endif
+"    else
+"        if line('.') < line('$') && nlSome
+"            padCount += 1
+"        endif
+"    endif
+"
+"    call <SID>InsertNewLines(padCount, a:above)
+"endfunction
+"" Starts a new line below/above isolated from the other non-blank lines.
+"nnoremap <silent> <leader>o :call <SID>InsertNewParagPadding()<CR>o
+"nnoremap <silent> <leader>O :call <SID>InsertNewParagPadding(1)<CR>O
 
 " Trims the surrounding spaces (0x20) then break the line at the current
 " position.
@@ -221,8 +240,9 @@ function s:TrimAndBreak()
     endif
     " Removes the following spaces only when the current char is a space.
     if getline('.')[col('.') - 1] == ' '
-        let [lnum, cnum] = searchpos(' [^ ]', 's', line('.'))
+        let [lnum, cnum] = searchpos(' [^ ]', 'se', line('.'))
         if lnum
+            echom 'Next non-space at: ' . cnum
             normal! "_d`'
         endif
     endif
@@ -271,4 +291,6 @@ augroup gitsetup
     autocmd FileType gitcommit
                 \ autocmd CursorMoved,CursorMovedI *
                 \ let &l:textwidth = line('.') == 1 ? 0 : 120
+    " Fix the weird background color of the 'special keys' in git commit
+    autocmd FileType gitcommit highlight SpecialKey NONE
 augroup end
