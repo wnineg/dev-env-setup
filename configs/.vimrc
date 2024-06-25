@@ -28,6 +28,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'altercation/vim-colors-solarized'
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'ishan9299/nvim-solarized-lua'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/vim-easy-align'
@@ -46,11 +47,15 @@ call plug#end()
 
 " Cursor Appearance
 if has('nvim')
-    " Restore cursor fix the neovim
-    augroup RestoreCursorShapeOnExit
-        autocmd!
-        autocmd VimLeave * set guicursor=a:ver20-blinkon1
-    augroup END
+    let nvimVer = v:lua.vim.version()
+    " The cursor issue only happens for some versions < 0.10.x
+    if nvimVer.major == 0 && nvimVer.minor < 10
+        " Restore cursor fix the neovim
+        augroup RestoreCursorShapeOnExit
+            autocmd!
+            autocmd VimLeave * set guicursor=a:ver20-blinkon1
+        augroup END
+    endif
 else
     " Change cursor's shape based on modes
     let &t_SI = "\<Esc>[6 q"
@@ -87,17 +92,20 @@ augroup vimStartup
                     \      && index(['xxd', 'gitrebase'], &filetype) == -1
                     \ |   execute "normal! g`\""
                     \ | endif
-
 augroup END
 
 " -------------- "
 " Plugin Configs "
 " -------------- "
 
-" vim-colors-solarized
+" Theme
 syntax enable
-set background=dark
-colorscheme solarized
+if has('nvim')
+    colorscheme solarized8
+else
+    set background=dark
+    colorscheme solarized
+endif
 
 " vim-gitgutter
 set updatetime=100
