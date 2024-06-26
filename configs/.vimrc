@@ -1,4 +1,5 @@
 set breakindent
+set colorcolumn=+0
 set cursorline
 set expandtab
 set hlsearch
@@ -35,12 +36,16 @@ Plug 'junegunn/vim-easy-align'
 Plug 'machakann/vim-highlightedyank'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
 Plug 'mogelbrod/vim-jsonpath'
+Plug 'ms-jpq/coq_nvim'
+Plug 'neovim/nvim-lspconfig'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-surround'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'vim-python/python-syntax'
 Plug 'wellle/context.vim'
+Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'williamboman/mason.nvim'
 Plug 'ziglang/zig.vim'
 
 call plug#end()
@@ -94,18 +99,49 @@ augroup vimStartup
                     \ | endif
 augroup END
 
-" -------------- "
-" Plugin Configs "
-" -------------- "
+" ------ "
+" Themes "
+" ------ "
 
-" Theme
-syntax enable
+" Highlight trailing spaces
+if !has('nvim')
+    " VIM requires the highlight group be defined before the match
+    highlight ExtraWhitespace ctermbg=DarkGreen guibg=DarkGreen
+endif
+match ExtraWhitespace /\s\+$/
+
+augroup preColorSchemeSetup
+    autocmd!
+
+    autocmd ColorScheme *
+            \ highlight ExtraWhitespace ctermbg=DarkGreen guibg=DarkGreen
+augroup END
+
+" Main Theme
 if has('nvim')
     colorscheme solarized8
 else
     set background=dark
     colorscheme solarized
 endif
+
+highlight default link ColorColumn CursorColumn
+
+highlight DiagnosticError ctermfg=Red guifg=Red
+highlight DiagnosticUnderlineError cterm=undercurl gui=undercurl guisp=Red
+
+" -------------- "
+" Plugin Configs "
+" -------------- "
+
+let g:coq_settings = { 'auto_start': v:true }
+
+"vim-airline
+let g:airline_theme = 'deus'
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
 
 " vim-gitgutter
 set updatetime=100
@@ -133,15 +169,23 @@ let g:EasyMotion_smartcase = 1 " Turn on case-insensitive feature
 let mapleader = "\<SPACE>"
 
 " Misc mapping
-inoremap jk <ESC>
-nnoremap <BS> <ESC>
-onoremap <BS> <ESC>
-vnoremap <BS> <ESC>
-nnoremap <expr> <C-l> (&hls && v:hlsearch ? ':nohls' : ':set hls')."\n"
+nnoremap q: <nop>
+nnoremap <expr> <C-l> (&hls && v:hlsearch ? ':nohls' : ':set hls') . "\n"
 nnoremap $ g$
 nnoremap g$ $
 " <C-_> is actually <C-/>
 xnoremap <C-_> <ESC>/\%V
+
+" Quitting
+noremap <F12> <Cmd>q!<CR>
+" <F36> = <C-F12>
+noremap <F36> <Cmd>qa!<CR>
+
+" Escaping
+inoremap jk <ESC>
+nnoremap <BS> <ESC>
+onoremap <BS> <ESC>
+vnoremap <BS> <ESC>
 
 " Editing under normal mode
 nnoremap U <C-r>
@@ -151,7 +195,7 @@ nnoremap <expr> gp '`[' . strpart(getregtype(), 0, 1) . '`]'
 nnoremap gP <nop>
 
 " fzf.vim
-nnoremap <silent> <C-O> :Files <CR>
+nnoremap <silent> <A-o> :Files <CR>
 nnoremap <silent> <A-f> :Rg <CR>
 
 " vim-easymotion
@@ -169,22 +213,20 @@ nmap ga <Plug>(EasyAlign)
 xmap ga <Plug>(EasyAlign)
 
 " Alternating between first non-white char and beginning of the line
-function s:AltJumpToStart(visual = 0)
-    if a:visual
-        normal! gv
-    endif
+function s:AltJumpToStart()
     let cnum = col('.')
     normal! ^
     if col('.') == cnum
         normal! 0
     endif
 endfunction
-nnoremap <silent> 0 :call <SID>AltJumpToStart()<CR>
-vnoremap <silent> 0 :call <SID>AltJumpToStart(1)<CR>
+nnoremap 0 <Cmd>call <SID>AltJumpToStart()<CR>
+vnoremap 0 <Cmd>call <SID>AltJumpToStart()<CR>
 nnoremap <Leader>0 0
 vnoremap <Leader>0 0
 
-" Adds n new lines (without explicitly going into the insert mode).
+" Adds n new lines (without explicitly going into the insert mode) and
+" positions the cursor to last (depends on the insertion direction) new line.
 function s:InsertNewLines(n, above = 0)
     if a:n < 1
         return
@@ -197,44 +239,39 @@ function s:InsertNewLines(n, above = 0)
         exec 'normal!' . (a:n - 1) . 'k'
     endif
 endfunction
-" The below two mappings adds (n - 1) lines using the function first, then add
-" the last one using the native `o`/`O` command directly in the mapped
-" sequence. This trick helps to preserve the auto indentation when the cursor
-" goes into the insert mode at the last new line.
-" NOTE: Another trick mentioned in https://vi.stackexchange.com/a/4409 has the
-" drawback of the indentation of the last new line will always be preserved and
-" never clean up inside blocks (doesn't happen outside of blocks) even if the
-" line doesn't get any inputs afterward. (Indentation inside blocks of empty
-" lines would not be cleaned up as long as it had some inputs beforehand, even
-" the inputs are deleted immediately before leaving the insert mode)
-nnoremap <silent> o :<C-u>call <SID>InsertNewLines(v:count - 1)<CR>o
-nnoremap <silent> O :<C-u>call <SID>InsertNewLines(v:count - 1, 1)<CR>O
+" The below two mappings add n lines using the function first, then use the
+" `cc` command to enter the insert mode with autoindent.
+"nnoremap <silent> o :<C-u>call <SID>InsertNewLines(v:count ?? 1)<CR>cc
+nnoremap o <Cmd>call <SID>InsertNewLines(v:count ?? 1)<CR>cc
+nnoremap O <Cmd>call <SID>InsertNewLines(v:count ?? 1, 1)<CR>cc
 
-"function s:InsertNewParagPadding(above = 0)
-"    let padCount = 0
-"
-"    " If the current is not an empty line, we need a padding.
-"    if getline(line('.')) !~ '^\s*$'
-"        padCount += 1
-"    endif
-"
-"    let nl = (a:above ? line('.') - 1 : line('.') + 1) " _next_ line num
-"    let nlSome = getline(nl) !~ '^\s*$' " is the _next_ line not empty?
-"    if a:above
-"        if line('.') > 1 && nlSome
-"            padCount += 1
-"        endif
-"    else
-"        if line('.') < line('$') && nlSome
-"            padCount += 1
-"        endif
-"    endif
-"
-"    call <SID>InsertNewLines(padCount, a:above)
-"endfunction
-"" Starts a new line below/above isolated from the other non-blank lines.
-"nnoremap <silent> <leader>o :call <SID>InsertNewParagPadding()<CR>o
-"nnoremap <silent> <leader>O :call <SID>InsertNewParagPadding(1)<CR>O
+" Starts a new paragraph without entering the insert mode. Extra padding lines
+" might be inserted between the existing and new lines.
+function s:StartNewParagraph(above = 0)
+    let op = (a:above ? 'O' : 'o')
+    " Step to the line# of _next_ (depends on the insertion direction) line
+    let nlStep = (a:above ? -1 : 1)
+
+    " If the current is not an empty line, we need a padding.
+    if getline(line('.')) !~ '^\s*$'
+        exec 'normal!' . op
+    endif
+
+    " Inserts the line where the cursor will eventually end up
+    exec 'normal!' . op
+
+    " Inserts additional padding before _next_ line if it is not empty
+    let nl = line('.') + nlStep
+    if 1 <= nl && nl <= line('$') && getline(nl) !~ '^\s*$'
+        exec 'normal!' . op
+        call cursor(line('.') - nlStep, col('.'))
+    endif
+endfunction
+" Starts a new line below/above isolated from the other non-blank lines. Uses
+" the native `cc` command at last to enter the insert mode with autoindent
+" preserved.
+nnoremap <leader>o <Cmd>call <SID>StartNewParagraph()<CR>cc
+nnoremap <leader>O <Cmd>call <SID>StartNewParagraph(1)<CR>cc
 
 " Trims the surrounding spaces (0x20) then break the line at the current
 " position.
@@ -256,10 +293,10 @@ function s:TrimAndBreak()
     endif
     exec "normal!i\<CR>"
 endfunction
-nnoremap <silent> <C-j> :call <SID>TrimAndBreak()<CR>
+nnoremap <C-j> <Cmd>call <SID>TrimAndBreak()<CR>
 
 " Works like the native `{` and `}` but aware of indented paragraphs.
-function s:JumpToNextParag(reverse, visual = 0)
+function s:JumpToNextParag(reverse)
     if a:reverse
         let step = -1
         let CheckBound = {n -> n != 1}
@@ -267,9 +304,6 @@ function s:JumpToNextParag(reverse, visual = 0)
         let step = 1
         let last = line('$')
         let CheckBound = {n -> n != last}
-    endif
-    if a:visual
-        normal! gv
     endif
 
     let lnum = line('.')
@@ -283,10 +317,10 @@ function s:JumpToNextParag(reverse, visual = 0)
     endwhile
     exec 'normal!' . lnum . 'gg^'
 endfunction
-nnoremap <silent> { :call <SID>JumpToNextParag(1)<CR>
-nnoremap <silent> } :call <SID>JumpToNextParag(0)<CR>
-vnoremap <silent> { :<C-u>call <SID>JumpToNextParag(1, 1)<CR>
-vnoremap <silent> } :<C-u>call <SID>JumpToNextParag(0, 1)<CR>
+nnoremap { <Cmd>call <SID>JumpToNextParag(1)<CR>
+nnoremap } <Cmd>call <SID>JumpToNextParag(0)<CR>
+vnoremap { <Cmd>call <SID>JumpToNextParag(1)<CR>
+vnoremap } <Cmd>call <SID>JumpToNextParag(0)<CR>
 
 " -------------------------- "
 " File Type Specific Configs "
@@ -299,6 +333,5 @@ augroup gitsetup
     autocmd FileType gitcommit
                 \ autocmd CursorMoved,CursorMovedI *
                 \ let &l:textwidth = line('.') == 1 ? 0 : 120
-    " Fix the weird background color of the 'special keys' in git commit
-    autocmd FileType gitcommit highlight SpecialKey NONE
 augroup end
+
