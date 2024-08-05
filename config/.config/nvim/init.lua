@@ -1,0 +1,6 @@
+require('config.init')
+require('config.options')
+require('config.keymap')
+require('config.plugins')
+require('config.lsp')
+require('config.misc')

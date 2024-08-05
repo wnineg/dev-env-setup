@@ -1,0 +1,34 @@
+vim.opt.background = 'dark'
+vim.opt.breakindent = true
+vim.opt.colorcolumn = '+1'
+vim.opt.cursorline = true
+vim.opt.expandtab = true
+vim.opt.fillchars:append { foldopen = '', foldclose = '' }
+vim.opt.foldcolumn = '1'
+vim.opt.foldenable = true
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.gdefault = true
+vim.opt.guicursor = { 'n-v:block-Cursor/lCursor', 'i-c-ci-ve-sm:ver25-Cursor/lCursor', 'r-cr-o:hor20-Cursor/lCursor' }
+vim.opt.hlsearch = true
+vim.opt.ignorecase = true
+vim.opt.incsearch = true
+vim.opt.linebreak = true
+vim.opt.list = true
+vim.opt.listchars = { tab = '⇤–⇥', trail = '·', precedes = '⇠', extends = '⇢', nbsp = '□' }
+vim.opt.mouse = ''
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.scrolloff = 1
+vim.opt.shiftwidth = 4
+vim.opt.showbreak = '↪'
+vim.opt.showcmd = true
+vim.opt.smartcase = true
+vim.opt.softtabstop = 4
+vim.opt.spell = true
+vim.opt.spelllang = { 'en_us', 'en_gb' }
+vim.opt.spelloptions = { 'camel' }
+vim.opt.tabstop = 4
+vim.opt.textwidth = 120
+vim.opt.timeoutlen = 3000
+--vim.opt.virtualedit = onemore,block
