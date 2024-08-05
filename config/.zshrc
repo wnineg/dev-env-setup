@@ -1,3 +1,14 @@
+# xterm features
+if [[ "$TERM" == xterm* ]]; then
+    # Disables 'Alternate Scroll Mode'.
+    # https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h4-Functions-using-CSI-_-ordered-by-the-final-character-lparen-s-rparen:CSI-?-Pm-l:Ps-=-1-0-0-7.1F83
+    printf "\e[?1007l"
+fi
+
+if [[ $TERM_PROGRAM == WezTerm ]]; then
+    source "$HOME/.wezterm.sh"
+fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -85,12 +96,19 @@ plugins=(zsh-vi-mode zsh-syntax-highlighting git)
 
 # User configuration
 
+# zsh-completions
+# https://github.com/zsh-users/zsh-completions
+fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
+
 # Set the init mode of zsh-vi-mode to sourcing before the sourcing of oh-my-zsh.sh
 #ZVM_INIT_MODE=sourcing
 ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
 ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
 
 source $ZSH/oh-my-zsh.sh
+
+# Set the cursor style under insert mode of zsh-vi-mode, must be after sourcing oh-my-zsh.sh
+ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -137,17 +155,17 @@ compinit
 eval $(dircolors ~/.dircolors/dircolors.256dark)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets cursor)
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 
 function explore() {
         if [[ $# -eq 0 ]] ; then
-                explorer.exe $(wslpath -w "$(pwd)");
+                explorer.exe "$(wslpath -w .)";
                 return 0;
         fi
         if [[ -f $1 ]]; then
-                explorer.exe /select,$(wslpath -w "$1");
+                explorer.exe /select,"$(wslpath -w "$1")";
         else
-                explorer.exe $(wslpath -w "$1");
+                explorer.exe "$(wslpath -w "$1")";
         fi
         return 0;
 }
