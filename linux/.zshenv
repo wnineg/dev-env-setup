@@ -4,8 +4,9 @@ path+=(
 )
 export path
 export EDITOR=nvim
-export PAGER='less -F'
+export PAGER=less
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export LESS='-F -n'
 export JAVA_HOME='/home/wwong/java'
 export KUBECONFIG=~/.kube/config
 

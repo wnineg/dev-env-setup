@@ -1,4 +1,23 @@
-local kind_colors = require('ref.colors').kinds
+local default_colors = require('ref.default_colors')
+vim.api.nvim_create_autocmd('ColorScheme', {
+    callback = function()
+        vim.api.nvim_set_hl(0, 'CmpItemAbbr', { default = true, fg = 'Grey' })
+        vim.api.nvim_set_hl(0, 'CmpItemKind', { default = true, fg = '#2281c2' })
+        vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', {
+            default = true,
+            strikethrough = true,
+            fg = '#808080',
+        })
+        vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { default = true, fg = '#569cd6' })
+        vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { default = true, link = 'CmpItemAbbrMatch' })
+
+        for k, v in pairs(default_colors.kinds) do
+            local hl_name = 'CmpItemKind' .. k
+            vim.api.nvim_set_hl(0, hl_name, { default = true, fg = v })
+        end
+    end,
+    group = vim.api.nvim_create_augroup('CmpDefaultColors', { clear = true }),
+})
 
 local function create_keymap(cmp)
     return {
@@ -38,16 +57,16 @@ return {
             local icons = require('ref.icons').kinds
             local cmp = require('cmp')
 
-            vim.api.nvim_create_autocmd("User", {
-                pattern = "LuasnipPreExpand",
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'LuasnipPreExpand',
                 callback = function()
                     -- get event-parameters from `session`.
-                    local snippet = require("luasnip").session.event_node
+                    local snippet = require('luasnip').session.event_node
                     local expand_position =
-                    require("luasnip").session.event_args.expand_pos
+                    require('luasnip').session.event_args.expand_pos
 
-                    print(string.format("expanding snippet %s at %s:%s",
-                    table.concat(snippet:get_docstring(), "\n"),
+                    print(string.format('expanding snippet %s at %s:%s',
+                    table.concat(snippet:get_docstring(), '\n'),
                     expand_position[1],
                     expand_position[2]
                     ))
@@ -91,17 +110,6 @@ return {
                     ghost_text = true
                 }
             })
-
-            vim.api.nvim_set_hl(0, 'CmpItemAbbr', { fg = 'Grey' })
-            vim.api.nvim_set_hl(0, 'CmpItemKind', { fg = '#2281c2' })
-            vim.api.nvim_set_hl(0, 'CmpItemAbbrDeprecated', { strikethrough = true, fg = '#808080' })
-            vim.api.nvim_set_hl(0, 'CmpItemAbbrMatch', { fg = '#569cd6' })
-            vim.api.nvim_set_hl(0, 'CmpItemAbbrMatchFuzzy', { link = 'CmpItemAbbrMatch' })
-
-            for k, v in pairs(kind_colors) do
-                local hl_name = 'CmpItemKind' .. k
-                vim.api.nvim_set_hl(0, hl_name, { fg = v })
-            end
         end,
     },
     {

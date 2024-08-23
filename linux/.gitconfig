@@ -20,14 +20,15 @@
 [core]
     autocrlf = false
     editor = nvim
-    pager = delta --dark
+    pager = delta
 [pager]
     status = true
 [diff]
     colorMoved = default
 [interactive]
-    diffFilter = delta --color-only --dark
+    diffFilter = delta --color-only
 [delta]
+    syntax-theme = Coldark-Dark
     navigate = true
     side-by-side = true
 

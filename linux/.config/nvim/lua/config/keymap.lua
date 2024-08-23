@@ -7,9 +7,6 @@ end
 -- Quits command mode on <ESC>
 map('<ESC>', 'c', '<C-c>')
 
--- Disables Ex Mode
-map('Q', 'n', '<nop>')
-
 -- Search Highlight Toggle
 map('<F3>', 'n', function()
     if vim.o.hlsearch and vim.v.hlsearch == 1 then
@@ -28,11 +25,15 @@ map('<C-l>', { 'n', 'i', 'c' }, '<RIGHT>')
 --map('q:', 'n', ':')
 --map('<C-_>', 'v', [[<ESC>/\%\/]])
 
--- Window Adjustment
-map('<UP>', { 'n', 'i', 'v' }, '<C-w>+')
-map('<DOWN>', { 'n', 'i', 'v' }, '<C-w>-')
-map('<RIGHT>', { 'n', 'i', 'v' }, '<C-w>>')
-map('<LEFT>', { 'n', 'i', 'v' }, '<C-w><')
+-- Windows
+map('<UP>', { 'n', 'i', 'v' }, '<C-w>k')
+map('<DOWN>', { 'n', 'i', 'v' }, '<C-w>j')
+map('<RIGHT>', { 'n', 'i', 'v' }, '<C-w>l')
+map('<LEFT>', { 'n', 'i', 'v' }, '<C-w>h')
+map('<A-UP>', { 'n', 'i', 'v' }, '<C-w>+')
+map('<A-DOWN>', { 'n', 'i', 'v' }, '<C-w>-')
+map('<A-RIGHT>', { 'n', 'i', 'v' }, '<C-w>>')
+map('<A-LEFT>', { 'n', 'i', 'v' }, '<C-w><')
 
 -- Exits
 map('<F12>', { 'n', 'i', 'c' }, '<C-c><Cmd>q!<CR>')

@@ -1,6 +1,7 @@
 return {
     'nvim-treesitter/nvim-treesitter-context',
     dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    event = 'VeryLazy',
     config = function(_, opts)
         require('treesitter-context').setup(opts)
 

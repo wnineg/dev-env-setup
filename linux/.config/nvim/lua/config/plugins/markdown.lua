@@ -4,6 +4,6 @@ return {
         'nvim-treesitter/nvim-treesitter',
         'nvim-tree/nvim-web-devicons'
     },
-    fg = 'markdown',
+    ft = 'markdown',
     config = true,
 }

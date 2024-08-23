@@ -1,4 +1,4 @@
-if vim.env.WSL_DISTRO_NAME then
+if vim.fn.has('wsl') == 1 then
     -- :h clipboard-wsl
     vim.g.clipboard = {
         name = 'WslClipboard',
@@ -10,28 +10,27 @@ if vim.env.WSL_DISTRO_NAME then
             ['+'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
             ['*'] = 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
         },
-        cache_enabled = false
+        cache_enabled = false,
     }
 end
 
 -- Jump to the last edited position on file open
 -- :h restore-cursor
-local restoreCursorGroup = vim.api.nvim_create_augroup('RestoreCursor', { clear = true })
+local restore_cursor_group = vim.api.nvim_create_augroup('RestoreCursor', { clear = true })
+local cursor_reset_types = { 'gitcommit', 'gitrebase', 'xxd' }
 vim.api.nvim_create_autocmd('BufReadPre', {
     callback = function()
-        vim.api.nvim_create_autocmd('FileType', {
+        vim.api.nvim_create_autocmd('BufWinEnter', {
             callback = function()
-                local lastPos = vim.api.nvim_buf_get_mark(0, '"')
-                if lastPos == 0 then return end
-                local type = vim.o.filetype
-                local excludedTypes = { 'gitcommit', 'xxd', 'gitrebase' }
-                if vim.tbl_contains(excludedTypes, type) then return end
-                vim.api.nvim_win_set_cursor(0, lastPos)
+                if vim.tbl_contains(cursor_reset_types, vim.bo.filetype) then return end
+                local last_pos = vim.api.nvim_buf_get_mark(0, '"')
+                if last_pos[1] == 0 or last_pos[1] > vim.api.nvim_buf_line_count(0) then return end
+                vim.api.nvim_win_set_cursor(0, last_pos)
             end,
             buffer = 0,
             once = true,
-            group = restoreCursorGroup,
+            group = restore_cursor_group,
         })
     end,
-    group = restoreCursorGroup,
+    group = restore_cursor_group,
 })

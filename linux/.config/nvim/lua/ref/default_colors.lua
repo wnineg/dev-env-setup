@@ -1,10 +1,4 @@
 return {
-    diagnostics = {
-        error = 'Red',
-        warn  = 'Orange',
-        info  = 'LightBlue',
-        hint  = 'LightGreen',
-    },
     kinds = {
         Array         = '#2281c2',
         Boolean       = '#2281c2',

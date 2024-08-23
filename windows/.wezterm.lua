@@ -6,8 +6,7 @@ local function create_font_list(opts)
     local italic = (opts and opts.italic) or false
     return wezterm.font_with_fallback {
         { family = 'CommitMono', weight = weight, italic = italic },
-        { family = 'CommitMono Nerd Font', scale = 0.8, italic = italic },
-        { family = 'Nerd Font Symbols Font', italic = italic },
+        { family = 'Symbols Nerd Font', scale = 0.8, weight = weight, italic = italic },
     }
 end
 
@@ -37,6 +36,7 @@ return {
             font = create_font_list({ weight = 'Bold', italic = true }),
         },
     },
+    bold_brightens_ansi_colors = 'No',
     allow_square_glyphs_to_overflow_width = 'Never',
     use_cap_height_to_scale_fallback_fonts = true,
 
@@ -52,10 +52,10 @@ return {
             action = act.Nop,
         },
     },
-    selection_word_boundary = [[ :"'│·]],
+    selection_word_boundary = [[ :"'`│·]],
 
     keys = {
-        -- The default CTRL+SHIFT+C action doesn't clear selection after copy
+        -- The default CTRL+SHIFT+c action doesn't clear selection after copy
         {
             key = 'c',
             mods = 'CTRL|SHIFT',

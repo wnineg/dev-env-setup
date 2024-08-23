@@ -24,7 +24,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # zsh-autocomplete plugin
 # https://github.com/marlonrichert/zsh-autocomplete
-#source /home/wwong/zsh-autocomplete/zsh-autocomplete.plugin.zsh
+#source "$HOME/src/zsh-autocomplete/zsh-autocomplete.plugin.zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -107,6 +107,11 @@ ZVM_LINE_INIT_MODE=$ZVM_MODE_INSERT
 
 source $ZSH/oh-my-zsh.sh
 
+setopt   HIST_IGNORE_SPACE
+unsetopt SHARE_HISTORY
+unsetopt CLOBBER
+setopt   MAGIC_EQUAL_SUBST
+
 # Set the cursor style under insert mode of zsh-vi-mode, must be after sourcing oh-my-zsh.sh
 ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
 
@@ -134,14 +139,11 @@ ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias rg='rg -S --hidden'
-alias vi='nvim'
-alias vim='nvim'
+alias nv='nvim'
 alias py='python3'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-unsetopt share_history
 
 # zstyle ':completion:*'  matcher-list 'm:{a-z}={A-Z}'
 
@@ -152,7 +154,7 @@ zstyle ':completion:*' matcher-list '' 'm:{[:lower:][:upper:]}={[:upper:][:lower
 autoload -Uz compinit
 compinit
 
-eval $(dircolors ~/.dircolors/dircolors.256dark)
+eval $(dircolors "$HOME/src/dircolors-solarized/dircolors.256dark")
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)

@@ -3,7 +3,6 @@ local icons = require('ref.icons').diagnostics
 return {
     'akinsho/bufferline.nvim',
     dependencies = 'nvim-tree/nvim-web-devicons',
-    lazy = false,
     opts = {
         options = {
             show_buffer_close_icons = false,
@@ -17,7 +16,9 @@ return {
             fill = { bg = '#002630' },
         },
     },
-    keys = {
-        { 'gb', '<Cmd>BufferLinePick<CR>' },
-    },
+    config = function(_, opts)
+        require('bufferline').setup(opts)
+
+        vim.keymap.set('n', 'gb', '<Cmd>BufferLinePick<CR>')
+    end,
 }

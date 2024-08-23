@@ -1,13 +1,13 @@
 -- Bootstrap lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-    local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-    local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+    local out = vim.fn.system({ 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath })
     if vim.v.shell_error ~= 0 then
         vim.api.nvim_echo({
-            { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-            { out, "WarningMsg" },
-            { "\nPress any key to exit..." },
+            { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
+            { out, 'WarningMsg' },
+            { '\nPress any key to exit...' },
         }, true, {})
         vim.fn.getchar()
         os.exit(1)
@@ -15,33 +15,39 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Setup lazy.nvim
-require("lazy").setup({
-    spec = {
-        { import = 'plugins.colorscheme.solarized8' },
+local plugins = {
+    'bufferline',
+    'cmp',
+    'colorscheme.solarized8',
+    'diffview',
+    'dressing',
+    'fzf',
+    'gitsigns',
+    'illuminate',
+    'indent_blankline',
+    'lazydev',
+    'lspconfig',
+    'lualine',
+    'luasnip',
+    'markdown',
+    'mason',
+    'mini_comment',
+    'mini_files',
+    'navic',
+    'notify',
+    'surround',
+    'treesitter',
+    'treesitter_context',
+    'trouble',
+    'ufo',
+}
+local import_spec = {}
+for _, name in ipairs(plugins) do
+    table.insert(import_spec, { import = ('config.plugins.' .. name) })
+end
 
-        { import = 'plugins.bufferline' },
-        { import = 'plugins.cmp' },
-        { import = 'plugins.diffview' },
-        { import = 'plugins.dressing' },
-        { import = 'plugins.fzf' },
-        { import = 'plugins.gitsigns' },
-        { import = 'plugins.illuminate' },
-        { import = 'plugins.indent_blankline' },
-        { import = 'plugins.lazydev' },
-        { import = 'plugins.lspconfig' },
-        { import = 'plugins.lualine' },
-        { import = 'plugins.luasnip' },
-        { import = 'plugins.markdown' },
-        { import = 'plugins.mason' },
-        { import = 'plugins.navic' },
-        { import = 'plugins.noice' },
-        { import = 'plugins.notify' },
-        { import = 'plugins.surround' },
-        { import = 'plugins.treesitter' },
-        { import = 'plugins.treesitter_context' },
-        { import = 'plugins.trouble' },
-        { import = 'plugins.ufo' },
-    },
-    install = { colorscheme = { 'solarized8' } },
+-- Setup lazy.nvim
+require('lazy').setup({
+    spec = import_spec,
+    change_detection = { enabled = false },
 })

@@ -1,4 +1,5 @@
 local icons = require('ref.icons').kinds
+
 return {
     'folke/trouble.nvim',
     cmd = 'Trouble',

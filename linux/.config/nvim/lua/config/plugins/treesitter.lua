@@ -4,6 +4,12 @@ return {
     opts = {
         ensure_installed = {
             'bash',
+            'c',
+            'git_config',
+            'git_rebase',
+            'gitattributes',
+            'gitcommit',
+            'gitignore',
             'json',
             'java',
             'javascript',
@@ -12,6 +18,7 @@ return {
             'markdown_inline',
             'python',
             'regex',
+            'typescript',
             'vim',
             'vimdoc',
         },
