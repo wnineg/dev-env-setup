@@ -31,15 +31,19 @@ local plugins = {
     'luasnip',
     'markdown',
     'mason',
-    'mini_comment',
-    'mini_files',
+    'mini.comment',
+    'mini.files',
+    'mini.jump2d',
+    'mini.pairs',
     'navic',
-    'notify',
+    'sleuth',
+    'smart-splits',
     'surround',
     'treesitter',
     'treesitter_context',
     'trouble',
     'ufo',
+    'window-picker',
 }
 local import_spec = {}
 for _, name in ipairs(plugins) do

@@ -15,13 +15,13 @@ return {
             desc = 'Buffer Diagnostics (Trouble)',
         },
         {
-            '<leader>cs',
-            '<cmd>Trouble symbols toggle focus=false<cr>',
+            '<leader>ss',
+            '<cmd>Trouble symbols toggle<cr>',
             desc = 'Symbols (Trouble)',
         },
         {
-            '<leader>cl',
-            '<cmd>Trouble lsp toggle focus=false<cr>',
+            '<leader>sr',
+            '<cmd>Trouble lsp toggle follow=false<cr>',
             desc = 'LSP Definitions / references / ... (Trouble)',
         },
         {

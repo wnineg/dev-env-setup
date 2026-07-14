@@ -13,5 +13,9 @@ export KUBECONFIG=~/.kube/config
 # For WSL
 if [[ $WSL_DISTRO_NAME ]]; then
     path+=('/mnt/c/Windows' '/mnt/c/Windows/System32')
-    export whost="$(hostname).local"
+    if [[ $TERM_PROGRAM == WezTerm ]]; then
+        path+=('/mnt/c/Program Files/WezTerm')
+    fi
+    export whost="$(ip route show | grep -i default | awk '{print $3}')"
 fi
+. "$HOME/.cargo/env"

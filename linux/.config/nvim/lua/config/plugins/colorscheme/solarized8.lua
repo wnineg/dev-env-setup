@@ -16,6 +16,14 @@ return {
                 local diagnostic_info  = 'LightBlue'
                 local diagnostic_hint  = 'LightGreen'
 
+                -- Removes the 'reverse' flags
+                local status_line_hl = vim.api.nvim_get_hl(0, { name = 'StatusLine' })
+                vim.api.nvim_set_hl(0, 'StatusLine', vim.tbl_extend('force', status_line_hl, { reverse = false }))
+                local status_line_nc_hl = vim.api.nvim_get_hl(0, { name = 'StatusLineNC' })
+                vim.api.nvim_set_hl(0, 'StatusLineNC', vim.tbl_extend('force', status_line_nc_hl, { reverse = false }))
+                local tab_line_fill_hl = vim.api.nvim_get_hl(0, { name = 'TabLineFill' })
+                vim.api.nvim_set_hl(0, 'TabLineFill', vim.tbl_extend('force', tab_line_fill_hl, { reverse = false }))
+
                 vim.api.nvim_set_hl(0, 'NonText', { fg = nontext_fg })
                 vim.api.nvim_set_hl(0, 'Folded', { bg = '#0F5A6F' })
 
@@ -39,8 +47,6 @@ return {
                 vim.api.nvim_set_hl(0, 'DiagnosticSignWarn', { bg = line_nr_hl.bg, fg = diagnostic_warn })
                 vim.api.nvim_set_hl(0, 'DiagnosticSignInfo', { bg = line_nr_hl.bg, fg = diagnostic_info })
                 vim.api.nvim_set_hl(0, 'DiagnosticSignHint', { bg = line_nr_hl.bg, fg = diagnostic_hint })
-
-                vim.api.nvim_set_hl(0, 'TreesitterContext', { bg = '#002630' })
             end,
             group = vim.api.nvim_create_augroup('Solarized8Tuning', { clear = true }),
         })

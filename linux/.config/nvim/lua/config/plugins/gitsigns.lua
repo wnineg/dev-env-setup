@@ -7,8 +7,9 @@ vim.api.nvim_create_autocmd('ColorScheme', {
         local sign_col_bg = vim.api.nvim_get_hl(0, { name = 'SignColumn' }).bg
         for _, suffix in pairs({ 'Add', 'Change', 'Delete', 'Changedelete', 'Topdelete' }) do
             local staged_hl_name = 'GitSignsStaged' .. suffix
-            local fg = vim.api.nvim_get_hl(0, { name = staged_hl_name }).fg
-            vim.api.nvim_set_hl(0, staged_hl_name, { default = true, bg = sign_col_bg, fg = fg })
+            local orig = vim.api.nvim_get_hl(0, { name = staged_hl_name })
+            local updated = vim.tbl_extend('force', orig, { default = true, bg = sign_col_bg })
+            vim.api.nvim_set_hl(0, staged_hl_name, updated)
         end
     end,
     group = vim.api.nvim_create_augroup('GitSignsDefaultColors', { clear = true }),
@@ -32,7 +33,7 @@ return {
                 if vim.wo.diff then
                     vim.cmd.normal({ ']c', bang = true })
                 else
-                    gitsigns.nav_hunk('next')
+                    gitsigns.nav_hunk('next', { target = 'all' })
                 end
             end)
 
@@ -40,7 +41,7 @@ return {
                 if vim.wo.diff then
                     vim.cmd.normal({ '[c', bang = true })
                 else
-                    gitsigns.nav_hunk('prev')
+                    gitsigns.nav_hunk('prev', { target = 'all' })
                 end
             end)
 
@@ -58,5 +59,6 @@ return {
             map('<leader>hD', 'n', function() gitsigns.diffthis('~') end)
             map('<leader>td', 'n', gitsigns.toggle_deleted)
         end,
+        sign_priority = 100,
     },
 }

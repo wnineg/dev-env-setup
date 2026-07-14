@@ -5,6 +5,7 @@ return {
         { '<Leader>o', function() require('fzf-lua').files({ resume = true }) end },
         { '<Leader>b', function() require('fzf-lua').buffers() end },
         { '<Leader>g', function() require('fzf-lua').live_grep({ resume = true }) end },
+        { '<Leader>c', function() require('fzf-lua').git_status() end },
     },
     cmd = 'FzfLua',
     opts = {
@@ -18,6 +19,11 @@ return {
                 true,
                 ['<C-f>'] = 'preview-page-down',
                 ['<C-b>'] = 'preview-page-up',
+            },
+        },
+        git = {
+            status = {
+                preview_pager = false,
             },
         },
     },

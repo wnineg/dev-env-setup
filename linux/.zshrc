@@ -12,9 +12,9 @@ fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# fi
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -92,9 +92,11 @@ HIST_STAMPS="yyyy-mm-dd"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-vi-mode zsh-syntax-highlighting git)
+plugins=(zsh-vi-mode zsh-syntax-highlighting git docker)
 
 # User configuration
+
+PROMPT_EOL_MARK='%K{red} '
 
 # zsh-completions
 # https://github.com/zsh-users/zsh-completions
@@ -138,6 +140,8 @@ ZVM_INSERT_MODE_CURSOR=$ZVM_CURSOR_BLINKING_BEAM
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+# https://learn.microsoft.com/en-us/windows/wsl/networking
+alias whost="ip route show | grep -i default | awk '{print \$3}'"
 alias rg='rg -S --hidden'
 alias nv='nvim'
 alias py='python3'

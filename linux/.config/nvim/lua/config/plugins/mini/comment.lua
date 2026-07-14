@@ -1,5 +1,6 @@
 return {
-    'echasnovski/mini.comment',
+    'nvim-mini/mini.comment',
+    version = false,
     keys = { { '<C-_>', mode = { 'n', 'v' } } },
     opts = {
         options = {
@@ -13,4 +14,7 @@ return {
             textobject = nil,
         },
     },
+    config = function(_, opts)
+        require('mini.comment').setup(opts)
+    end,
 }

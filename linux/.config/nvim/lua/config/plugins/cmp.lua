@@ -56,21 +56,44 @@ return {
         config = function()
             local icons = require('ref.icons').kinds
             local cmp = require('cmp')
+            local luasnip = require("luasnip")
 
             vim.api.nvim_create_autocmd('User', {
                 pattern = 'LuasnipPreExpand',
                 callback = function()
                     -- get event-parameters from `session`.
-                    local snippet = require('luasnip').session.event_node
+                    local snippet = luasnip.session.event_node
                     local expand_position =
-                    require('luasnip').session.event_args.expand_pos
+                    luasnip.session.event_args.expand_pos
 
-                    print(string.format('expanding snippet %s at %s:%s',
-                    table.concat(snippet:get_docstring(), '\n'),
-                    expand_position[1],
-                    expand_position[2]
-                    ))
+                    local doc = table.concat(snippet:get_docstring(), '\n')
+                    print(string.format('expanding snippet %s at %s:%s', doc, expand_position[1], expand_position[2]))
                 end
+            })
+
+            -- Extends the common keymap with the LuaSnip keymap
+            local mapping = vim.tbl_extend('force', create_keymap(cmp), {
+                ['<TAB>'] = cmp.mapping(function(fallback)
+                    if cmp.visible() then
+                        if luasnip.expandable() then
+                            luasnip.expand()
+                        else
+                            cmp.confirm({ select = true })
+                        end
+                    elseif luasnip.locally_jumpable(1) then
+                        luasnip.jump(1)
+                    else
+                        fallback()
+                    end
+                end, { 'i', 's' }),
+
+                ['<S-TAB>'] = cmp.mapping(function(fallback)
+                    if luasnip.locally_jumpable(-1) then
+                        luasnip.jump(-1)
+                    else
+                        fallback()
+                    end
+                end, { 'i', 's' }),
             })
 
             cmp.setup({
@@ -85,7 +108,7 @@ return {
                 },
                 snippet = {
                     expand = function(args)
-                        require('luasnip').lsp_expand(args.body)
+                        luasnip.lsp_expand(args.body)
                     end,
                 },
                 window = {
@@ -98,7 +121,7 @@ return {
                         scrolloff = 1,
                     }
                 },
-                mapping = create_keymap(cmp),
+                mapping = mapping,
                 sources = cmp.config.sources({
                     { name = 'nvim_lsp' },
                     { name = 'luasnip' },

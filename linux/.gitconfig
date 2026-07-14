@@ -8,7 +8,7 @@
     indiff = diff --staged
     amend = commit --amend
     # To limit the lengths of messages, add the format option like: --format=\"%C(auto)%h %d %<(120,trunc)%s\"
-    ls = log --graph --author-date-order --oneline -25
+    gh = log --graph --author-date-order --oneline -25
     fixup = commit --fixup
     squash = commit --squash
     shownames = show --name-status
@@ -16,6 +16,7 @@
     ff = merge --ff-only
     go = switch
     wt = worktree
+    lu = log --oneline @..@{u}
 
 [core]
     autocrlf = false
@@ -24,20 +25,21 @@
 [pager]
     status = true
 [diff]
-    colorMoved = default
+    colorMoved = no
 [interactive]
     diffFilter = delta --color-only
 [delta]
     syntax-theme = Coldark-Dark
+    line-numbers = true
     navigate = true
-    side-by-side = true
+;     side-by-side = true
 
 [merge]
     tool = bc
 [mergetool]
     keepBackup = false
 [mergetool "bc"]
-    path = /mnt/c/Program Files/Beyond Compare 4/BCompare.exe
+    cmd = /mnt/c/Program\\ Files/Beyond\\ Compare\\ 4/BCompare.exe /automerge /reviewconflicts $LOCAL $REMOTE $BASE $MERGED
     trustExitCode = true
 [pull]
     rebase = true

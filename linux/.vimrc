@@ -2,7 +2,13 @@ set breakindent
 set colorcolumn=+0
 set cursorline
 set expandtab
+set fillchars+=foldopen:,foldclose:
+set foldcolumn=1
+set foldenable
+set foldlevel=99
+set foldlevelstart=99
 set gdefault
+set hidden
 set hlsearch
 set ignorecase
 set incsearch
@@ -24,15 +30,8 @@ set tabstop=4
 set timeoutlen=3000
 set virtualedit=onemore,block
 
-set foldcolumn=1
-set foldlevel=99
-set foldlevelstart=99
-set foldenable
-set fillchars+=foldopen:,foldclose:
-
 call plug#begin()
 
-Plug 'kevinhwang91/promise-async'
 Plug 'airblade/vim-gitgutter'
 Plug 'altercation/vim-colors-solarized'
 Plug 'easymotion/vim-easymotion'
@@ -51,22 +50,6 @@ Plug 'wellle/context.vim'
 Plug 'ziglang/zig.vim'
 
 call plug#end()
-
-if !empty($WSL_DISTRO_NAME)
-    " :h clipboard-wsl
-    let g:clipboard = {
-                \   'name': 'WslClipboard',
-                \   'copy': {
-                \      '+': 'clip.exe',
-                \      '*': 'clip.exe',
-                \    },
-                \   'paste': {
-                \      '+': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-                \      '*': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-                \   },
-                \   'cache_enabled': 0,
-                \ }
-endif
 
 " Cursor Appearance
 " Change cursor's shape based on modes

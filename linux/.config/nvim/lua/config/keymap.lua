@@ -36,8 +36,8 @@ map('<A-RIGHT>', { 'n', 'i', 'v' }, '<C-w>>')
 map('<A-LEFT>', { 'n', 'i', 'v' }, '<C-w><')
 
 -- Exits
-map('<F12>', { 'n', 'i', 'c' }, '<C-c><Cmd>q!<CR>')
-map('<F48>', { 'n', 'i', 'c' }, '<C-c><Cmd>qa!<CR>') -- CTRL+SHIFT+F12
+map('<F12>', { 'n', 'i', 'c' }, '<Cmd>q!<CR>')
+map('<F48>', { 'n', 'i', 'c' }, '<Cmd>qa!<CR>') -- CTRL+SHIFT+F12
 
 -- Escaping
 map('jk', 'i', '<ESC>')

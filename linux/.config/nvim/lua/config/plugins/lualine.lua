@@ -43,12 +43,6 @@ return {
             },
             theme = 'onedark',
             ignore_focus = {
-                'dap-repl',
-                'dapui_breakpoints',
-                'dapui_console',
-                'dapui_scopes',
-                'dapui_stacks',
-                'dapui_watches',
                 'help',
             },
         },

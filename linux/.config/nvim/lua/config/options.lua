@@ -15,7 +15,7 @@ vim.opt.ignorecase = true
 vim.opt.incsearch = true
 vim.opt.linebreak = true
 vim.opt.list = true
-vim.opt.listchars = { tab = '⇤–⇥', trail = '·', precedes = '⇠', extends = '⇢', nbsp = '□' }
+vim.opt.listchars = { tab = '⇤–⇥', trail = '▒', precedes = '⇠', extends = '⇢', nbsp = '□' }
 vim.opt.mouse = ''
 vim.opt.number = true
 vim.opt.relativenumber = true
@@ -23,6 +23,7 @@ vim.opt.scrolloff = 1
 vim.opt.shiftwidth = 4
 vim.opt.showbreak = '↪'
 vim.opt.showcmd = true
+-- vim.opt.signcolumn = 'auto:2'
 vim.opt.smartcase = true
 vim.opt.softtabstop = 4
 vim.opt.spell = true
@@ -32,3 +33,4 @@ vim.opt.tabstop = 4
 vim.opt.textwidth = 120
 vim.opt.timeoutlen = 3000
 --vim.opt.virtualedit = onemore,block
+vim.opt.wrapscan = false
